@@ -3,20 +3,33 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Mky fitness tracking API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: User profile and goals
+  - name: workouts
+    description: Workout routines and exercises
+  - name: sessions
+    description: Workout sessions and progress
+  - name: schedule
+    description: Workout scheduling and reminders
+  - name: streak
+    description: Streaks and gamification
+  - name: dashboard
+    description: Dashboard summary endpoints
+  - name: trainer
+    description: AI personal trainer chat
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,258 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the user profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update the user profile and fitness goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /profile/calories:
+    get:
+      operationId: getCalorieRecommendation
+      tags: [profile]
+      summary: AI-calculated daily calorie target based on profile and goal
+      responses:
+        "200":
+          description: Calorie recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalorieRecommendation"
+
+  /workouts:
+    get:
+      operationId: listWorkouts
+      tags: [workouts]
+      summary: List all workout routines
+      responses:
+        "200":
+          description: Workouts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workout"
+    post:
+      operationId: createWorkout
+      tags: [workouts]
+      summary: Create a workout routine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkoutRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+
+  /workouts/{workoutId}:
+    parameters:
+      - name: workoutId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getWorkout
+      tags: [workouts]
+      summary: Get a workout routine
+      responses:
+        "200":
+          description: Workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+    put:
+      operationId: updateWorkout
+      tags: [workouts]
+      summary: Update a workout routine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkoutRequest"
+      responses:
+        "200":
+          description: Updated workout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workout"
+    delete:
+      operationId: deleteWorkout
+      tags: [workouts]
+      summary: Delete a workout routine
+      responses:
+        "204":
+          description: Deleted
+
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List recent workout sessions
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+    post:
+      operationId: completeSession
+      tags: [sessions]
+      summary: Log a completed workout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteSessionRequest"
+      responses:
+        "201":
+          description: Session logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /schedule:
+    get:
+      operationId: getSchedule
+      tags: [schedule]
+      summary: Get the user's weekly workout schedule
+      responses:
+        "200":
+          description: Weekly schedule entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleEntry"
+    post:
+      operationId: upsertSchedule
+      tags: [schedule]
+      summary: Upsert the user's weekly workout schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertScheduleRequest"
+      responses:
+        "200":
+          description: Updated schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleEntry"
+
+  /reminders:
+    get:
+      operationId: getReminders
+      tags: [schedule]
+      summary: Active reminders for missed or upcoming workouts
+      responses:
+        "200":
+          description: Reminder list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reminder"
+
+  /streak:
+    get:
+      operationId: getStreak
+      tags: [streak]
+      summary: Current and best workout streak
+      responses:
+        "200":
+          description: Streak info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Streak"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Daily dashboard summary (today's workout, streak, weekly progress)
+      responses:
+        "200":
+          description: Dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+
+  /trainer/chat:
+    post:
+      operationId: trainerChat
+      tags: [trainer]
+      summary: Chat with the AI personal trainer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainerChatRequest"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainerReply"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +296,377 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    FitnessGoal:
+      type: string
+      enum: [lose_weight, maintain, build_muscle, improve_endurance]
+
+    ActivityLevel:
+      type: string
+      enum: [sedentary, light, moderate, active, very_active]
+
+    Sex:
+      type: string
+      enum: [male, female, other]
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        sex:
+          $ref: "#/components/schemas/Sex"
+        age:
+          type: integer
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+        goal:
+          $ref: "#/components/schemas/FitnessGoal"
+        activityLevel:
+          $ref: "#/components/schemas/ActivityLevel"
+        targetWeightKg:
+          type: number
+          nullable: true
+      required: [id, displayName, sex, age, heightCm, weightKg, goal, activityLevel]
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        sex:
+          $ref: "#/components/schemas/Sex"
+        age:
+          type: integer
+        heightCm:
+          type: number
+        weightKg:
+          type: number
+        goal:
+          $ref: "#/components/schemas/FitnessGoal"
+        activityLevel:
+          $ref: "#/components/schemas/ActivityLevel"
+        targetWeightKg:
+          type: number
+          nullable: true
+      required: [displayName, sex, age, heightCm, weightKg, goal, activityLevel]
+
+    CalorieRecommendation:
+      type: object
+      properties:
+        bmr:
+          type: integer
+        tdee:
+          type: integer
+        targetCalories:
+          type: integer
+        proteinGrams:
+          type: integer
+        carbGrams:
+          type: integer
+        fatGrams:
+          type: integer
+        explanation:
+          type: string
+      required: [bmr, tdee, targetCalories, proteinGrams, carbGrams, fatGrams, explanation]
+
+    Exercise:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sets:
+          type: integer
+        reps:
+          type: integer
+        weightKg:
+          type: number
+          nullable: true
+        durationSeconds:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [id, name, sets, reps]
+
+    ExerciseInput:
+      type: object
+      properties:
+        name:
+          type: string
+        sets:
+          type: integer
+        reps:
+          type: integer
+        weightKg:
+          type: number
+          nullable: true
+        durationSeconds:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [name, sets, reps]
+
+    Workout:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+          description: e.g. push, pull, legs, cardio, full body
+        estimatedMinutes:
+          type: integer
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exercise"
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, category, estimatedMinutes, exercises, createdAt]
+
+    CreateWorkoutRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+        estimatedMinutes:
+          type: integer
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseInput"
+      required: [name, category, estimatedMinutes, exercises]
+
+    UpdateWorkoutRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+        estimatedMinutes:
+          type: integer
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseInput"
+      required: [name, category, estimatedMinutes, exercises]
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        workoutId:
+          type: string
+        workoutName:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+        caloriesBurned:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [id, workoutId, workoutName, completedAt, durationMinutes]
+
+    CompleteSessionRequest:
+      type: object
+      properties:
+        workoutId:
+          type: string
+        durationMinutes:
+          type: integer
+        caloriesBurned:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [workoutId, durationMinutes]
+
+    Weekday:
+      type: string
+      enum: [mon, tue, wed, thu, fri, sat, sun]
+
+    ScheduleEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        weekday:
+          $ref: "#/components/schemas/Weekday"
+        timeOfDay:
+          type: string
+          description: HH:MM 24-hour format
+        workoutId:
+          type: string
+        workoutName:
+          type: string
+      required: [id, weekday, timeOfDay, workoutId, workoutName]
+
+    ScheduleEntryInput:
+      type: object
+      properties:
+        weekday:
+          $ref: "#/components/schemas/Weekday"
+        timeOfDay:
+          type: string
+        workoutId:
+          type: string
+      required: [weekday, timeOfDay, workoutId]
+
+    UpsertScheduleRequest:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScheduleEntryInput"
+      required: [entries]
+
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [missed, upcoming]
+        message:
+          type: string
+        workoutId:
+          type: string
+        workoutName:
+          type: string
+        scheduledFor:
+          type: string
+          format: date-time
+      required: [id, kind, message, workoutId, workoutName, scheduledFor]
+
+    Streak:
+      type: object
+      properties:
+        currentDays:
+          type: integer
+        bestDays:
+          type: integer
+        lastActiveDate:
+          type: string
+          format: date
+          nullable: true
+        weekHistory:
+          type: array
+          description: Last 7 days, oldest to newest
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              completed:
+                type: boolean
+            required: [date, completed]
+      required: [currentDays, bestDays, weekHistory]
+
+    Dashboard:
+      type: object
+      properties:
+        greeting:
+          type: string
+        todayDate:
+          type: string
+          format: date
+        todaysWorkout:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ScheduleEntry"
+        todayCompleted:
+          type: boolean
+        streak:
+          $ref: "#/components/schemas/Streak"
+        weeklyStats:
+          type: object
+          properties:
+            sessionsThisWeek:
+              type: integer
+            minutesThisWeek:
+              type: integer
+            caloriesThisWeek:
+              type: integer
+            goalSessions:
+              type: integer
+          required: [sessionsThisWeek, minutesThisWeek, caloriesThisWeek, goalSessions]
+        recentSessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+        activeReminders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Reminder"
+      required:
+        - greeting
+        - todayDate
+        - todayCompleted
+        - streak
+        - weeklyStats
+        - recentSessions
+        - activeReminders
+
+    TrainerChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required: [role, content]
+
+    TrainerChatRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainerChatMessage"
+      required: [message]
+
+    TrainerReply:
+      type: object
+      properties:
+        reply:
+          type: string
+      required: [reply]
